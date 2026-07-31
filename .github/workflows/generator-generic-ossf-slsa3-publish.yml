@@ -61,6 +61,29 @@ jobs:
       id-token: write # To sign the provenance.
       contents: write # To add assets to a release.
     uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v1.4.0
+    <title> Backup Protection Simulator — MSETCL</title>
+<style>
+/* ============================================================
+   BASE / THEME — Industrial SCADA/HMI theme, compact for 1920x1080
+   ============================================================ */
+:root{
+  --bg:#0b0f13;
+  --panel:#161d24;
+  --panel-2:#1d2731;
+  --panel-3:#232f3a;
+  --line:#2b3844;
+  --teal:#00c2d6;
+  --teal-dim:#0a5a66;
+  --amber:#f5a623;
+  --red:#ef4444;
+  --green:#22c55e;
+  --blue:#3ba7ff;
+  --text:#dbe6ea;
+  --text-dim:#8497a1;
+  --lcd-bg:#03170a;
+  --lcd-fg:#3dff7a;
+  font-size:13px;
+}
     with:
       base64-subjects: "${{ needs.build.outputs.digests }}"
       upload-assets: true # Optional: Upload to a new release
