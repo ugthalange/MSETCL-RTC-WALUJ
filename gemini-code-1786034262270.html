@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Substation Earthing Mat Design Calculator (IEEE Std 80)</title>
+    <style>
+        :root {
+            --bg-color: #f1f5f9;
+            --card-bg: #ffffff;
+            --primary: #1e3a8a;
+            --primary-accent: #2563eb;
+            --text-main: #0f172a;
+            --text-muted: #475569;
+            --border: #cbd5e1;
+            --pass-bg: #dcfce7;
+            --pass-text: #15803d;
+            --fail-bg: #fee2e2;
+            --fail-text: #b91c1c;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: var(--primary);
+            color: white;
+            padding: 1.5rem 2rem;
+            border-radius: 0.75rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+        }
+
+        header p {
+            color: #93c5fd;
+            margin-top: 0.25rem;
+            font-size: 0.95rem;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 1024px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            margin-bottom: 1.5rem;
+        }
+
+        .card h2 {
+            font-size: 1.2rem;
+            color: var(--primary);
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.25rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem 1.25rem;
+        }
+
+        @media (max-width: 600px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-size: 0.825rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 0.35rem;
+        }
+
+        .input-wrapper {
+            display: flex;
+            align-items: center;
+        }
+
+        .input-wrapper input {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 0.375rem 0 0 0.375rem;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .input-wrapper input:focus {
+            border-color: var(--primary-accent);
+        }
+
+        .input-wrapper .unit {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-left: none;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0 0.375rem 0.375rem 0;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+        }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            background: #f8fafc;
+            border-radius: 0.5rem;
+            border: 1px solid #e2e8f0;
+        }
+
+        .result-row .label {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .result-row .value {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .badge.pass {
+            background-color: var(--pass-bg);
+            color: var(--pass-text);
+        }
+
+        .badge.fail {
+            background-color: var(--fail-bg);
+            color: var(--fail-text);
+        }
+
+        .status-card {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            font-weight: bold;
+            margin-top: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .status-card.pass {
+            background: var(--pass-bg);
+            color: var(--pass-text);
+            border: 1px solid #bbf7d0;
+        }
+
+        .status-card.fail {
+            background: var(--fail-bg);
+            color: var(--fail-text);
+            border: 1px solid #fca5a5;
+        }
+
+        .actions {
+            margin-top: 1.5rem;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            background: var(--primary-accent);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.375rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn:hover {
+            background: #1d4ed8;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Substation Earthing Mat Design Calculator</h1>
+        <p>Calculations according to ANSI/IEEE Std 80-1986 Safety Standards</p>
+    </header>
+
+    <div class="layout">
+        <!-- INPUT PARAMETERS COLUMN -->
+        <div class="column">
+            <!-- System & Grid Geometry -->
+            <div class="card">
+                <h2>1. Grid Geometry & System Parameters</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Grid Length (l<sub>a</sub>)</label>
+                        <div class="input-wrapper"><input type="number" id="la" value="100"><span class="unit">m</span></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Grid Width (l<sub>b</sub>)</label>
+                        <div class="input-wrapper"><input type="number" id="lb" value="69.3"><span class="unit">m</span></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Fault Level at Bus</label>
+                        <div class="input-wrapper"><input type="number" id="fault_mva" value="25000"><span class="unit">MVA</span></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Incoming Voltage (V<sub>in</sub>)</label>
+                        <div class="input-wrapper"><input type="number" id="vin" value="400"><span class="unit">kV</span></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Conductor Spacing (D)</label>
+                        <div class="input-wrapper"><input type="number" id="D" value="5"><span class="unit">m</span></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Grid Depth (h)</label>
+                        <div class="input-wrapper"><input type="number" id="h" value="0.5"><span class="unit">m</span></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Longitudinal Conductors (n<sub>a</sub>)</label>
+                        <div class="input-wrapper"><input type="number" id="na" value="21"><span class="unit">nos</span></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Transverse Conductors (n<sub>b</sub>)</label>
+                        <div class="input-wrapper"><input type="number" id="nb" value="13"><span class="unit">nos</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Soil & Material Parameters -->
+            <div class="card">
+                <h2>2. Soil & Material Specifications</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Soil Resistivity (&rho;)</label>
+                        <div class="input-wrapper"><input type="number" id="q" value="40"><span class="unit">&Omega;&middot;m</span></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Crushed Rock Resistivity (&rho;<sub>s</sub>)</label>
+                        <div class="input-wrapper"><input type="number" id="qs" value="3000"><span class="unit">&Omega;&middot;m</span></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Surface Layer Thickness (h<sub>s</sub>)</label>
+                        <div class="input-wrapper"><input type="number" id="hs" value="0.1"><span class="unit">m</span></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Conductor Diameter (d)</label>
+                        <div class="input-wrapper"><input type="number" id="d" value="36"><span class="unit">mm</span></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Fault Duration (Sizing) (t)</label>
+                        <div class="input-wrapper"><input type="number" id="t_size" value="3"><span class="unit">sec</span></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Fault Duration (Shock) (t<sub>s</sub>)</label>
+                        <div class="input-wrapper"><input type="number" id="t_shock" value="0.5"><span class="unit">sec</span></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Current Growth Factor (C<sub>p</sub>)</label>
+                        <div class="input-wrapper"><input type="number" id="cp" value="1.1" step="0.1"><span class="unit">-</span></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Decrement Factor (D<sub>f</sub>)</label>
+                        <div class="input-wrapper"><input type="number" id="df" value="1.0" step="0.1"><span class="unit">-</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Electrodes & Accessories -->
+            <div class="card">
+                <h2>3. Earth Electrodes & Rods</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Perimeter Rods</label>
+                        <div class="input-wrapper"><input type="number" id="rods_perim" value="68"><span class="unit">nos</span></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Corner Rods</label>
+                        <div class="input-wrapper"><input type="number" id="rods_corner" value="16"><span class="unit">nos</span></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Lightning Arrestor Rods</label>
+                        <div class="input-wrapper"><input type="number" id="rods_la" value="20"><span class="unit">nos</span></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Transformer Rods</label>
+                        <div class="input-wrapper"><input type="number" id="rods_tx" value="6"><span class="unit">nos</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- OUTPUT CALCULATIONS COLUMN -->
+        <div class="column">
+            <!-- Key Results -->
+            <div class="card">
+                <h2>Earthing Mat Sizing & Parameters</h2>
+                <div class="results-grid">
+                    <div class="result-row">
+                        <span class="label">Grid Area (A)</span>
+                        <span class="value" id="res_area">0 m&sup2;</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="label">Primary Fault Current (I<sub>f</sub>)</span>
+                        <span class="value" id="res_if">0 A</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="label">Required Conductor Cross-Section</span>
+                        <span class="value" id="res_cond_size">0 mm&sup2;</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="label">Surface Layer Reduction Factor (C<sub>s</sub>)</span>
+                        <span class="value" id="res_cs">0</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="label">Station Ground Resistance (R<sub>g</sub>)</span>
+                        <span class="value" id="res_rg">0 &Omega;</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="label">Grid Fault Current (I<sub>g</sub>)</span>
+                        <span class="value" id="res_ig">0 A</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="label">Ground Potential Rise (GPR)</span>
+                        <span class="value" id="res_gpr">0 V</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="label">Total Earthing Conductors + Rods</span>
+                        <span class="value" id="res_length">0 m</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Safety Evaluation -->
+            <div class="card">
+                <h2>Safety Potential Verification</h2>
+                <div class="results-grid">
+                    <div class="result-row">
+                        <div>
+                            <div class="label">Touch Potential (E<sub>touch</sub> vs E<sub>mesh</sub>)</div>
+                            <div style="font-size: 0.8rem; color: #64748b;">Tolerable: <span id="res_etouch">0</span> V | Estimated: <span id="res_emesh">0</span> V</div>
+                        </div>
+                        <span id="badge_touch" class="badge pass">PASS</span>
+                    </div>
+
+                    <div class="result-row">
+                        <div>
+                            <div class="label">Step Potential (E<sub>step</sub> vs E<sub>s</sub>)</div>
+                            <div style="font-size: 0.8rem; color: #64748b;">Tolerable: <span id="res_estep">0</span> V | Estimated: <span id="res_estep_est">0</span> V</div>
+                        </div>
+                        <span id="badge_step" class="badge pass">PASS</span>
+                    </div>
+                </div>
+
+                <div id="overall_status" class="status-card pass">
+                    EARTHING MAT DESIGN IS SAFE & COMPLIANT
+                </div>
+            </div>
+
+            <div class="actions">
+                <button class="btn" onclick="window.print()">Print Calculation Sheet</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function calculate() {
+        // Fetch inputs
+        const la = parseFloat(document.getElementById('la').value) || 0;
+        const lb = parseFloat(document.getElementById('lb').value) || 0;
+        const fault_mva = parseFloat(document.getElementById('fault_mva').value) || 0;
+        const vin = parseFloat(document.getElementById('vin').value) || 0;
+        const D = parseFloat(document.getElementById('D').value) || 1;
+        const h = parseFloat(document.getElementById('h').value) || 0.5;
+        const na = parseFloat(document.getElementById('na').value) || 0;
+        const nb = parseFloat(document.getElementById('nb').value) || 0;
+
+        const q = parseFloat(document.getElementById('q').value) || 0;
+        const qs = parseFloat(document.getElementById('qs').value) || 0;
+        const hs = parseFloat(document.getElementById('hs').value) || 0.1;
+        const d_mm = parseFloat(document.getElementById('d').value) || 36;
+        const t_size = parseFloat(document.getElementById('t_size').value) || 3;
+        const t_shock = parseFloat(document.getElementById('t_shock').value) || 0.5;
+        const cp = parseFloat(document.getElementById('cp').value) || 1.1;
+        const df = parseFloat(document.getElementById('df').value) || 1.0;
+
+        const rods_perim = parseFloat(document.getElementById('rods_perim').value) || 0;
+        const rods_corner = parseFloat(document.getElementById('rods_corner').value) || 0;
+        const rods_la = parseFloat(document.getElementById('rods_la').value) || 0;
+        const rods_tx = parseFloat(document.getElementById('rods_tx').value) || 0;
+
+        // 1. Area & Length Calculations
+        const grid_area = la * lb;
+        const total_rods = rods_perim + rods_corner + rods_la + rods_tx;
+        const rod_length = total_rods * 3; // Standard 3m rods
+        const conductor_long = la * na;
+        const conductor_trans = lb * nb;
+        const total_conductor_length = conductor_long + conductor_trans + rod_length;
+
+        // 2. Fault Current & Conductor Sizing
+        const i_fault = (fault_mva * 1000) / (Math.sqrt(3) * vin);
+        // Mild steel / Steel sizing formula approximation A = I * sqrt(t) / 162
+        const req_cond_area = (i_fault * Math.sqrt(t_size)) / 162;
+
+        // 3. Surface Layer Reduction Factor Cs
+        const cs = 1 - (0.09 * (1 - q / qs)) / (2 * hs + 0.09);
+
+        // 4. Tolerable Potentials (50kg body)
+        const e_touch = (1000 + 1.5 * cs * qs) * (0.116 / Math.sqrt(t_shock));
+        const e_step = (1000 + 6.0 * cs * qs) * (0.116 / Math.sqrt(t_shock));
+
+        // 5. Ground Resistance Rg (Sverak's formula)
+        const rg = q * ((1 / total_conductor_length) + (1 / Math.sqrt(20 * grid_area)) * (1 + (1 / (1 + h * Math.sqrt(20 / grid_area)))));
+
+        // 6. Grid Current & GPR
+        const ig = i_fault * cp * df;
+        const gpr = ig * rg;
+
+        // 7. Estimated Mesh & Step Potentials
+        const n = Math.max(na, nb);
+        const d_m = d_mm / 1000;
+        const km = (1 / (2 * Math.PI)) * (Math.log((D * D) / (16 * h * d_m) + ((D + 2 * h) * (D + 2 * h)) / (8 * D * d_m) - h / (4 * d_m)) + (1 / Math.PI) * Math.log(8 / (Math.PI * (2 * n - 1))));
+        const ki = 0.656 + 0.172 * n;
+        const ks = (1 / Math.PI) * (1 / (2 * h) + 1 / (D + h) + (1 / D) * (1 - Math.pow(0.5, n - 2)));
+
+        const e_mesh = (q * ig * km * ki) / total_conductor_length;
+        const e_step_est = (q * ig * ks * ki) / total_conductor_length;
+
+        // Update UI
+        document.getElementById('res_area').innerHTML = grid_area.toFixed(1) + " m&sup2;";
+        document.getElementById('res_if').textContent = i_fault.toFixed(1) + " A";
+        document.getElementById('res_cond_size').innerHTML = req_cond_area.toFixed(1) + " mm&sup2;";
+        document.getElementById('res_cs').textContent = cs.toFixed(3);
+        document.getElementById('res_rg').innerHTML = rg.toFixed(3) + " &Omega;";
+        document.getElementById('res_ig').textContent = ig.toFixed(1) + " A";
+        document.getElementById('res_gpr').textContent = gpr.toFixed(1) + " V";
+        document.getElementById('res_length').textContent = total_conductor_length.toFixed(0) + " m";
+
+        document.getElementById('res_etouch').textContent = e_touch.toFixed(1);
+        document.getElementById('res_emesh').textContent = e_mesh.toFixed(1);
+        document.getElementById('res_estep').textContent = e_step.toFixed(1);
+        document.getElementById('res_estep_est').textContent = e_step_est.toFixed(1);
+
+        // Verification checks
+        const touch_pass = e_mesh <= e_touch;
+        const step_pass = e_step_est <= e_step;
+
+        const badgeTouch = document.getElementById('badge_touch');
+        badgeTouch.textContent = touch_pass ? 'PASS' : 'FAIL';
+        badgeTouch.className = 'badge ' + (touch_pass ? 'pass' : 'fail');
+
+        const badgeStep = document.getElementById('badge_step');
+        badgeStep.textContent = step_pass ? 'PASS' : 'FAIL';
+        badgeStep.className = 'badge ' + (step_pass ? 'pass' : 'fail');
+
+        const overall = document.getElementById('overall_status');
+        if (touch_pass && step_pass) {
+            overall.textContent = 'EARTHING MAT DESIGN IS SAFE & COMPLIANT';
+            overall.className = 'status-card pass';
+        } else {
+            overall.textContent = 'SAFETY VIOLATION: INCREASE CONDUCTOR LENGTH OR RODS';
+            overall.className = 'status-card fail';
+        }
+    }
+
+    // Attach real-time input listeners
+    document.querySelectorAll('input').forEach(input => {
+        input.addEventListener('input', calculate);
+    });
+
+    // Run initial calculation on page load
+    calculate();
+</script>
+</body>
+</html>
